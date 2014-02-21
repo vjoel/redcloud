@@ -16,6 +16,7 @@ end
 
 class Server < Component
   link client: Client
+
   continuous :capacity  # req per second handled by server
   continuous :backlog   # number of req not yet handled
   continuous :latency   # expected seconds to process a new request
@@ -42,12 +43,17 @@ server = w.create(Server) {|s|
   s.capacity = 50.0
 }
 
-backlog = [[w.clock, server.backlog]]
-latency = [[w.clock, server.latency * 1000]]
+backlog = []
+latency = []
 
+measure = proc do
+  backlog << [w.clock, server.backlog]
+  latency << [w.clock, server.latency * 1000]
+end
+
+measure.call
 w.evolve 20.0 do
-  backlog << [[w.clock, server.backlog]]
-  latency << [[w.clock, server.latency * 1000]]
+  measure.call
 end
 
 if ARGV.delete('-p')
@@ -62,4 +68,6 @@ else
   puts "use -p switch to show plot"
 end
 
-puts "total delay: %8.2f seconds" % server.delay
+fmt = "%20s: %8.2f %s"
+puts fmt % ["total delay", server.delay, "seconds"]
+puts fmt % ["elapsed", w.clock, "seconds"]
