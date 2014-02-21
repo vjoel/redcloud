@@ -7,7 +7,7 @@ PRJ = "redcloud"
 
 def version
   @version ||= begin
-    require 'redcloud/redcloud'
+    require 'redcloud/version'
     warn "RedCloud::VERSION not a string" unless
       RedCloud::VERSION.kind_of? String
     RedCloud::VERSION
