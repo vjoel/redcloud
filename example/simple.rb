@@ -19,10 +19,12 @@ class Server < Component
   continuous :capacity  # req per second handled by server
   continuous :backlog   # number of req not yet handled
   continuous :latency   # expected seconds to process a new request
+  continuous :delay     # total delay contributed by this server
 
   flow do
     diff " backlog' = client.request_rate - capacity "
     alg  " latency  = backlog / capacity "
+    diff " delay'   = latency "
   end
   
   transition do
@@ -59,3 +61,5 @@ if ARGV.delete('-p')
 else
   puts "use -p switch to show plot"
 end
+
+puts "total delay: %8.2f seconds" % server.delay
